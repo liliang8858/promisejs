@@ -196,4 +196,30 @@ Promise.deferred = function () {
   return dfd;
 };
 
+Promise.all = function(promises){
+  return new Promise((resolve,reject)=>{
+    let result = [];
+    let times = 0;
+    const processSucces =(index,val)=>{
+      result[index] = val
+      if(++times == promises.length){
+        resolve(result)
+      }
+    }
+    for(let i=0;i< promises.length;i++){// 同步并发
+      let p = promises[i];
+      if(p && p.then === 'function'){
+
+        p.then((data)=>{
+          processSucces(i,data)
+        },reject)// 如果每一个promise失败，就直接执行失败 rejet
+      }else{
+        processSucces(i,p)
+      }
+    }
+  })
+}
+
+
+
 module.exports = Promise;
