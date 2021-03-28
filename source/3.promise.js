@@ -6,36 +6,51 @@ const REJECTED = "REJECTED";
 function resolvePromise(promise2, x, resolve, reject) {
   //console.log(promise2, x, resolve, reject);
   // 核心流程
-  if(promise2 === x){
-      return reject(new TypeError('错误'))
+  if (promise2 === x) {
+    return reject(new TypeError("错误"));
   }
-  // 我可能写的promise 和别人的promise兼容，考虑不是自己写的promise
+  // 别人的promise 可能调用成功后，还能调用失败
 
-  if( typeof x === 'object' && x !== null || typeof x === 'function'){
+  if ((typeof x === "object" && x !== null) || typeof x === "function") {
+    // 我可能写的promise 和别人的promise兼容，考虑不是自己写的promise
+    // 確保promise 符合規範
+    let called = false;
     //有可能是promise
     try {
-        let then = x.then;// 由可能then方法是通过defineProperty来实现，取值时可能发生异常
+      let then = x.then; // 由可能then方法是通过defineProperty来实现，取值时可能发生异常
 
-        if( typeof then === 'function'){
-            //这里我就认为是promise 
-            // 等价 x.then 还是触发getter可能会发生异常
-            then.call(x, y=>{
-                resolve(y)
-            },r=>{
-                reject(r)
-            })  
-        }else{
-            resolve(x)
-        }
+      if (typeof then === "function") {
+        //这里我就认为是promise
+        // 等价 x.then 还是触发getter可能会发生异常
+        then.call(
+          x,
+          (y) => {
+            if (called) {
+              return;
+            }
+            called = true;
+            resolve(y);
+          },
+          (r) => {
+            if (called) {
+              return;
+            }
+            called = true;
+            reject(r);
+          }
+        );
+      } else {
+        resolve(x);
+      }
     } catch (e) {
-        reject(e)
+      if (called) {
+        return;
+      }
+      reject(e);
     }
-   
-
-  }else{
-    resolve(x) // 说明返回的是一个普通值,直接将他放到promise2的resolve
+  } else {
+    resolve(x); // 说明返回的是一个普通值,直接将他放到promise2的resolve
   }
-
 }
 
 class Promise {
