@@ -167,16 +167,19 @@ class Promise {
   }
 
   static resolve(value){
-    new Promise((resolve,reject)=>{
+    return new Promise((resolve,reject)=>{
       resolve(value)
     })
   }
 
   
   static reject(value){
-    new Promise((resolve,reject)=>{
+    return new Promise((resolve,reject)=>{
       reject(value)
     })
+  }
+  catch(errorFn){
+    return this.then(null,errorFn)
   }
 }
 
