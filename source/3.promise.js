@@ -22,12 +22,14 @@ function resolvePromise(promise2, x, resolve, reject) {
       if (typeof then === "function") {
         //这里我就认为是promise
         // 等价 x.then 还是触发getter可能会发生异常
-        then.call( x,(y) => {
+        then.call(
+          x,
+          (y) => {
             if (called) {
               return;
             }
             called = true;
-            resolvePromise(promise2,y, resolve, reject);// 直到解析不是promise
+            resolvePromise(promise2, y, resolve, reject); // 直到解析不是promise
           },
           (r) => {
             if (called) {
@@ -59,6 +61,9 @@ class Promise {
     this.onResolveCallbacks = []; // 存放成功的回调方法
     this.onRejectCallbacks = []; //存放失败的方法
     const resolve = (value) => {
+        if(value instanceof Promise){
+            return value.then(resolve,reject)
+        }
       // 成功
       if (this.status === PENDING) {
         this.status = FULFILLED; // 修改状态
@@ -88,8 +93,14 @@ class Promise {
 
   // then 中的参数是可选
   then(onFulfilled, onReject) {
-    onFulfilled = typeof onFulfilled === 'function'?onFulfilled:v=>v;
-    onReject = typeof onReject === 'function'?onReject:err=>{ throw err}
+    //   if(typeof onFulfilled !== 'function'){
+    //     onFulfilled = v => v
+    //   }
+    //   if(typeof onReject !== 'function'){
+    //     onReject = err => {throw err}
+    //   }
+    onFulfilled = typeof onFulfilled === "function" ? onFulfilled : v => v;
+    onReject = typeof onReject === "function" ? onReject : err => {  throw err; };
     //用于链式调用
     let promise2 = new Promise((resolve, reject) => {
       if (this.status == FULFILLED) {
@@ -104,7 +115,6 @@ class Promise {
 
             // 总结 x的值，决定调用promise2的resolve  还是reject
             //     如果是promise  则取他的状态
-
             resolvePromise(promise2, x, resolve, reject);
             //   resolve(x);
           } catch (e) {
@@ -156,19 +166,17 @@ class Promise {
   }
 }
 
-
 // npm install promises-aplus-tests -g   --force
 // promises-aplus-tests 3.promise.js 检查是否符合规范
 
 // 延迟对象 帮我们减少一次套用
-Promise.deferred = function(){
-    let dfd = {}
-    dfd.promise = new Promise((resolve,reject)=>{
-        dfd.resolve = resolve
-        dfd.reject =reject
-
-    })
-    return dfd
-}
+Promise.deferred = function () {
+  let dfd = {};
+  dfd.promise = new Promise((resolve, reject) => {
+    dfd.resolve = resolve;
+    dfd.reject = reject;
+  });
+  return dfd;
+};
 
 module.exports = Promise;
