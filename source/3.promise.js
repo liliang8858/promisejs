@@ -5,6 +5,7 @@ const REJECTED = "REJECTED";
 //利用 x的值来判断是调用promise2的resolve 还是reject
 function resolvePromise(promise2, x, resolve, reject) {
   //console.log(promise2, x, resolve, reject);
+
   // 核心流程
   if (promise2 === x) {
     return reject(new TypeError("错误"));
@@ -163,6 +164,19 @@ class Promise {
       }
     });
     return promise2;
+  }
+
+  static resolve(value){
+    new Promise((resolve,reject)=>{
+      resolve(value)
+    })
+  }
+
+  
+  static reject(value){
+    new Promise((resolve,reject)=>{
+      reject(value)
+    })
   }
 }
 
