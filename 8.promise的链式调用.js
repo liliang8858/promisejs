@@ -29,7 +29,7 @@ let promise2 = new Promise((resolve)=>{
     return new Promise((resolve,reject)=>{
         //x 可能就是promise
         setTimeout(() => {
-            reject('ok')
+            resolve('ok')// 這裏走成功，promise2 走成功，  如果 reject 就走promise2 失敗
         }, 1000);
     })
 })
